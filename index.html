@@ -6,14 +6,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>PDF All Tools</title>
+<title>PDF ALL TOOLS</title>
+
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 
 <style>
 
 body{
-font-family: Arial;
+font-family:Arial;
 margin:0;
-background:#f5f6fa;
+background:#f2f2f2;
 }
 
 header{
@@ -30,22 +32,21 @@ padding:20px;
 }
 
 h2{
-margin-top:40px;
 color:#444;
 }
 
 .grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
 gap:15px;
-margin-top:15px;
+margin-top:20px;
 }
 
 .tool{
 background:white;
 padding:20px;
-text-align:center;
 border-radius:10px;
+text-align:center;
 box-shadow:0 4px 10px rgba(0,0,0,0.1);
 cursor:pointer;
 font-weight:bold;
@@ -53,6 +54,30 @@ font-weight:bold;
 
 .tool:hover{
 background:#f1f1f1;
+}
+
+.upload-box{
+background:white;
+padding:20px;
+border-radius:10px;
+margin-top:20px;
+text-align:center;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+button{
+padding:12px 20px;
+background:#e74c3c;
+border:none;
+color:white;
+border-radius:6px;
+font-size:16px;
+cursor:pointer;
+margin-top:10px;
+}
+
+button:hover{
+background:#c0392b;
 }
 
 footer{
@@ -80,6 +105,20 @@ PDF ALL TOOLS
 <div class="container">
 
 
+<h2>Merge PDF Tool</h2>
+
+<div class="upload-box">
+
+<input type="file" id="pdfFiles" multiple>
+
+<br>
+
+<button onclick="mergePDF()">Merge PDF</button>
+
+</div>
+
+
+
 <h2>Organize PDF</h2>
 
 <div class="grid">
@@ -89,79 +128,18 @@ PDF ALL TOOLS
 <div class="tool">Remove Pages</div>
 <div class="tool">Extract Pages</div>
 <div class="tool">Organize PDF</div>
-<div class="tool">Scan to PDF</div>
 
 </div>
 
 
-<h2>Optimize PDF</h2>
-
-<div class="grid">
-
-<div class="tool">Compress PDF</div>
-<div class="tool">Repair PDF</div>
-<div class="tool">OCR PDF</div>
-
-</div>
-
-
-<h2>Convert to PDF</h2>
+<h2>Convert Tools</h2>
 
 <div class="grid">
 
 <div class="tool">JPG to PDF</div>
-<div class="tool">Word to PDF</div>
-<div class="tool">PowerPoint to PDF</div>
-<div class="tool">Excel to PDF</div>
-<div class="tool">HTML to PDF</div>
-
-</div>
-
-
-<h2>Convert from PDF</h2>
-
-<div class="grid">
-
 <div class="tool">PDF to JPG</div>
+<div class="tool">Word to PDF</div>
 <div class="tool">PDF to Word</div>
-<div class="tool">PDF to PowerPoint</div>
-<div class="tool">PDF to Excel</div>
-<div class="tool">PDF to PDF/A</div>
-
-</div>
-
-
-<h2>Edit PDF</h2>
-
-<div class="grid">
-
-<div class="tool">Rotate PDF</div>
-<div class="tool">Add Page Numbers</div>
-<div class="tool">Add Watermark</div>
-<div class="tool">Crop PDF</div>
-<div class="tool">Edit PDF</div>
-
-</div>
-
-
-<h2>PDF Security</h2>
-
-<div class="grid">
-
-<div class="tool">Unlock PDF</div>
-<div class="tool">Protect PDF</div>
-<div class="tool">Sign PDF</div>
-<div class="tool">Redact PDF</div>
-<div class="tool">Compare PDF</div>
-
-</div>
-
-
-<h2>PDF Intelligence</h2>
-
-<div class="grid">
-
-<div class="tool">Translate PDF</div>
 
 </div>
 
@@ -176,5 +154,53 @@ PDF ALL TOOLS
 </footer>
 
 
+<script>
+
+async function mergePDF(){
+
+const { PDFDocument } = PDFLib;
+
+const files = document.getElementById('pdfFiles').files;
+
+if(files.length === 0){
+
+alert("Please upload PDF files");
+
+return;
+
+}
+
+const mergedPdf = await PDFDocument.create();
+
+for(let file of files){
+
+const arrayBuffer = await file.arrayBuffer();
+
+const pdf = await PDFDocument.load(arrayBuffer);
+
+const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+
+pages.forEach(page => mergedPdf.addPage(page));
+
+}
+
+const mergedPdfFile = await mergedPdf.save();
+
+const blob = new Blob([mergedPdfFile], {type:'application/pdf'});
+
+const link = document.createElement('a');
+
+link.href = URL.createObjectURL(blob);
+
+link.download = "merged.pdf";
+
+link.click();
+
+}
+
+</script>
+
+
 </body>
+
 </html>
